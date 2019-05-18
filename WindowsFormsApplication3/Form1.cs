@@ -15,17 +15,19 @@ namespace WindowsFormsApplication3
         Bitmap DrawArea;
         Graphics g;
         SolidBrush pinkBrush = new SolidBrush(Color.HotPink);
+        List<Brush> brushes = new List<Brush>();
 
         List<List<int>> beginTab = new List<List<int>>();
         List<List<int>> nextTab = new List<List<int>>();
-        List<Brush> brushes = new List<Brush>();
+        
+
         Random rnd = new Random();
         int nextState = 1;
 
         Timer timer;
 
-        int wys = 50;
-        int szer = 50;
+        int wys;
+        int szer;
 
         public Form1()
         {
@@ -44,16 +46,14 @@ namespace WindowsFormsApplication3
                 brushes.Add(new SolidBrush(randomColor));
             }
             beginTab = new List<List<int>>();
-            for (int i = 0; i < szer; i++)
-            {
-                beginTab.Add(Enumerable.Repeat<int>(0, wys).ToList());
-            }
+            
             nextTab = new List<List<int>>();
-            for (int i = 0; i < szer; i++)
-            {
-                nextTab.Add(Enumerable.Repeat<int>(0, wys).ToList());
-            }
-            GenerateRandomSeeds(2, 10);
+            
+
+            comboBox1.Items.Add("Jednorodne");
+            comboBox1.Items.Add("Z promieniem");
+            comboBox1.Items.Add("Losowe");
+            comboBox1.Items.Add("Klikanie");
         }
 
         public void timer1_Tick(object sender, EventArgs e)
@@ -116,6 +116,19 @@ namespace WindowsFormsApplication3
 
         private void button1_Click(object sender, EventArgs e)
         {
+            int a = int.Parse(textBox1.Text);
+            int b = int.Parse(textBox2.Text);
+            wys = int.Parse(textBox3.Text);
+            szer = int.Parse(textBox4.Text);
+            for (int i = 0; i < szer; i++)
+            {
+                beginTab.Add(Enumerable.Repeat<int>(0, wys).ToList());
+            }
+            for (int i = 0; i < szer; i++)
+            {
+                nextTab.Add(Enumerable.Repeat<int>(0, wys).ToList());
+            }
+            GenerateRandomSeeds(a, b);
             if (timer.Enabled)
             {
                 timer.Stop();
