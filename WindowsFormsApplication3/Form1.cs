@@ -47,6 +47,7 @@ namespace WindowsFormsApplication3
                 brushes.Add(new SolidBrush(randomColor));
             }
 
+
             comboBox2.Items.Add("Periodyczne");
             comboBox2.Items.Add("Absorbujące");
 
@@ -73,15 +74,39 @@ namespace WindowsFormsApplication3
                 nextTab.Add(Enumerable.Repeat<int>(0, wys).ToList());
             }
 
-            for(int i = 0; i<szer; i++)
+            for (int i = 0; i < szer; i++)
             {
                 for (int j = 0; j < wys; j++)
                 {
                     if (beginTab[i][j] == 0)
                     {
                         int which = 0;
-                        which = Neighbours(i, j);
-                      
+
+                        if (comboBox3.Text == "Moore")
+                        {
+                            which = Moore(i, j);
+                        }
+                        else if (comboBox3.Text == "Von Neumann")
+                        {
+                            which = Neumann(i, j);
+                        }
+                        else if (comboBox3.Text == "Heks L")
+                        {
+                            which = Heks(i, j, 0);
+                        }
+                        else if (comboBox3.Text == "Heks P")
+                        {
+                            which = Heks(i, j, 2);
+                        }
+                        else if (comboBox3.Text == "Heks Los")
+                        {
+                            which = Heks(i, j, rnd.Next(2) * 2);
+                        }
+                        else if (comboBox3.Text == "Pent Los")
+                        {
+                            which = PentLos(i, j);
+                        }
+
                         if (which > 0)
                         {
                             nextTab[i][j] = which;
@@ -97,34 +122,201 @@ namespace WindowsFormsApplication3
             pictureBox1.Image = DrawArea;
         }
 
-        private int Neighbours(int x, int y)
+        private int Moore(int x, int y)
+        {
+            List<int> counters = Enumerable.Repeat<int>(0, nextState + 1).ToList();
+            if (comboBox2.Text == "Absorbujące")
+            {
+                for (int i = x - 1; i <= x + 1; i++)
+                {
+                    for (int j = y - 1; j <= y + 1; j++)
+                    {
+                        if ((i != x || j != y) &&
+                            (i >= 0 && i < szer) &&
+                            (j >= 0 && j < wys))
+                        {
+                            if (beginTab[i][j] > 0)
+                            {
+                                counters[beginTab[i][j]]++;
+                            }
+                        }
+                    }
+                }
+            }
+            else if (comboBox2.Text == "Periodyczne")
+            {
+                for (int i = x - 1; i <= x + 1; i++)
+                {
+                    int row = (i + szer) % szer;
+                    for (int j = y - 1; j <= y + 1; j++)
+                    {
+                        int col = (j + wys) % wys;
+                        if ((row != x || col != y))
+                        {
+                            if (beginTab[row][col] > 0)
+                            {
+                                counters[beginTab[row][col]]++;
+                            }
+                        }
+                    }
+                }
+            }             
+            return counters.IndexOf(counters.Max());
+        }
+        private int Neumann(int x, int y)
         {
             List<int> counters = Enumerable.Repeat<int>(0, nextState + 1).ToList();
 
-            for (int i = x - 1; i <= x + 1; i++)
+            if (comboBox2.Text == "Absorbujące")
             {
-                for (int j = y - 1; j <= y + 1; j++)
+                for (int i = x - 1; i <= x + 1; i++)
                 {
-                    if ((i != x || j != y) && (i >= 0 && i < szer) && (j >= 0 && j < wys))
+                    for (int j = y - 1; j <= y + 1; j++)
                     {
-                        if (beginTab[i][j] > 0)
+                        if ((i != x || j != y) && (i == x || j == y) && (i >= 0 && i < szer) && (j >= 0 && j < wys))
                         {
-                            counters[beginTab[i][j]]++;
+                            if (beginTab[i][j] > 0)
+                            {
+                                counters[beginTab[i][j]]++;
+                            }
+                        }
+                    }
+                }
+            }
+            else if (comboBox2.Text == "Periodyczne")
+            {
+                for (int i = x - 1; i <= x + 1; i++)
+                {
+                    int row = (i + szer) % szer;
+                    for (int j = y - 1; j <= y + 1; j++)
+                    {
+                        int col = (j + wys) % wys;
+                        if ((row != x || col != y)&&(row == x || col == y))
+                        {
+                            if (beginTab[row][col] > 0)
+                            {
+                                counters[beginTab[row][col]]++;
+                            }
                         }
                     }
                 }
             }
 
-            return counters.IndexOf(counters.Max());
+                return counters.IndexOf(counters.Max());
         }
+        private int Heks(int x, int y, int diff)
+        {
+            List<int> counters = Enumerable.Repeat<int>(0, nextState + 1).ToList();
+
+            if (comboBox2.Text == "Absorbujące")
+            {
+                for (int i = x - 1; i <= x + 1; i++)
+                {
+                    for (int j = y - 1; j <= y + 1; j++)
+                    {
+                        if ((i != x || j != y) &&
+                            (Math.Abs(i - x - j + y) != diff) &&
+                            (i >= 0 && i < szer) &&
+                            (j >= 0 && j < wys))
+                        {
+                            if (beginTab[i][j] > 0)
+                            {
+                                counters[beginTab[i][j]]++;
+                            }
+                        }
+                    }
+                }
+            }
+            else if (comboBox2.Text == "Periodyczne")
+            {
+                for (int i = x - 1; i <= x + 1; i++)
+                {
+                    int row = (i + szer) % szer;
+                    for (int j = y - 1; j <= y + 1; j++)
+                    {
+                        int col = (j + wys) % wys;
+                        if ((row != x || col != y) &&
+                            (Math.Abs(row - x - col + y) != diff))
+                        {
+                            if (beginTab[row][col] > 0)
+                            {
+                                counters[beginTab[row][col]]++;
+                            }
+                        }
+                    }
+                }
+            }
+                return counters.IndexOf(counters.Max());
+        }
+        private int PentLos(int x, int y)
+        {
+            List<int> counters = Enumerable.Repeat<int>(0, nextState + 1).ToList();
+
+            int startX = x - 1, endX = x + 1;
+            int startY = y - 1, endY = y + 1;
+
+            switch (rnd.Next(4))
+            {
+                case 0:
+                    endY = y;
+                    break;
+                case 1:
+                    startY = y;
+                    break;
+                case 2:
+                    endX = x;
+                    break;
+                case 3:
+                    startX = x;
+                    break;
+            }
+
+            if (comboBox2.Text == "Absorbujące")
+            {
+                for (int i = startX; i <= endX; i++)
+                {
+                    for (int j = startY; j <= endY; j++)
+                    {
+                        if ((i != x || j != y) &&
+                            (i >= 0 && i < szer) &&
+                            (j >= 0 && j < wys))
+                        {
+                            if (beginTab[i][j] > 0)
+                            {
+                                counters[beginTab[i][j]]++;
+                            }
+                        }
+                    }
+                }
+            }
+            else if (comboBox2.Text == "Periodyczne")
+            {
+                for (int i = startX; i <= endX; i++)
+                {
+                    int row = (i + szer) % szer;
+                    for (int j = startY; j <= endY; j++)
+                    {
+                        int col = (j + wys) % wys;
+                        if ((row != x || col != y))
+                        {
+                            if (beginTab[row][col] > 0)
+                            {
+                                counters[beginTab[row][col]]++;
+                            }
+                        }
+                    }
+                }
+            }
+                return counters.IndexOf(counters.Max());
+        }
+
         public void Draw(int row, int col, int state)
         {       
            g.FillRectangle(brushes[state - 1], col * 5, row * 5, 5, 5);
         }
 
         private void button1_Click(object sender, EventArgs e)
-        {         
-            
+        {                 
             if (timer.Enabled)
             {
                 timer.Stop();
@@ -136,7 +328,6 @@ namespace WindowsFormsApplication3
         private void comboBox1_SelectedValueChanged(object sender, EventArgs e)
         {
             g.Clear(Color.Transparent);
-
             beginTab = new List<List<int>>();
             nextTab = new List<List<int>>();
 
@@ -172,8 +363,15 @@ namespace WindowsFormsApplication3
             }
             else if (comboBox1.Text == "Klikanie")
             {
-
+                g.Clear(Color.Transparent);
+                nextTab = new List<List<int>>();
+                for (int i = 0; i < 500; i++)
+                {
+                    nextTab.Add(Enumerable.Repeat<int>(0, 500).ToList());
+                }
             }
+
+            pictureBox1.Image = DrawArea;
         }
 
 
@@ -261,29 +459,23 @@ namespace WindowsFormsApplication3
             MouseEventArgs myszka = (MouseEventArgs)e;
             Point coordinates = myszka.Location;
 
-            wys = int.Parse(textBox3.Text);
-            szer = int.Parse(textBox4.Text);
+            int row = coordinates.Y / 5;
+            int col = coordinates.X / 5;
 
-            int x = coordinates.X / (500 / wys);
-            int y = coordinates.Y / (500 / szer);
-
-            beginTab[x][y] = nextState;
-
-            g.Clear(Color.Transparent);
-            for (int z = 0; z < wys; z++)
-            {
-                for (int j = 0; j < szer; j++)
-                {
-                    if (beginTab[z][j] == nextState)
-                    {
-                        if (wys > szer)
-                            g.FillRectangle(pinkBrush, z * (500 / wys), j * (500 / wys), 500 / wys, 500 / wys);
-                        if (szer > wys)
-                            g.FillRectangle(pinkBrush, z * (500 / szer), j * (500 / szer), 500 / szer, 500 / szer);
-                    }
-                }
-            }
+            nextTab[row][col] = nextState;
+            Draw(row, col, nextState);
             pictureBox1.Image = DrawArea;
+            nextState++;
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            g.Clear(Color.Transparent);
+            nextTab = new List<List<int>>();
+            for (int i = 0; i < szer; i++)
+            {
+                nextTab.Add(Enumerable.Repeat<int>(0, wys).ToList());
+            }
         }
     }
 
