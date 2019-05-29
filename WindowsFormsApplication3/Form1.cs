@@ -377,7 +377,6 @@ namespace WindowsFormsApplication3
 
         public void GenerateRandomSeeds(int numberOfTypes, int numberOfSeeds)
         {
-            nextState = 1;
             var rand = new Random();
             for (int i = 1; i <= numberOfTypes; i++)
             {
@@ -476,6 +475,112 @@ namespace WindowsFormsApplication3
             {
                 nextTab.Add(Enumerable.Repeat<int>(0, wys).ToList());
             }
+        }
+
+        private void label13_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button3_Click(object sender, EventArgs e)
+        {
+            int iterations = int.Parse(textBox9.Text);
+            double kT = double.Parse(textBox10.Text);
+            for (int i = 0; i < iterations; i++)
+            {
+                MonteCarlo(kT);
+                Application.DoEvents();
+            }
+        }
+        public void MonteCarlo(double kt)
+        {
+            var rand = new Random();
+            List<Tuple<int, int>> cells = new List<Tuple<int, int>>();
+            for (int i = 0; i < nextTab.Count; i++)
+            {
+                for (int j = 0; j < nextTab[i].Count; j++)
+                {
+                    cells.Add(new Tuple<int, int>(i, j));
+                }
+            }
+            while (cells.Count > 0)
+            {
+                int index = rand.Next(cells.Count);
+                Tuple<int, int> cell = cells[index];
+                cells.Remove(cell);
+                int currentEnergy = OriginalEnergy(cell.Item1, cell.Item2);
+                List<int> neighbours = Neighbours(cell.Item1, cell.Item2);
+                neighbours.Remove(nextTab[cell.Item1][cell.Item2]);
+                if (neighbours.Count <= 0) continue;
+                for (int i = 0; i < neighbours.Count; i++)
+                {
+                    int energy = AlteredEnergy(cell.Item1, cell.Item2, neighbours[i]);
+                    int energyDiff = energy - currentEnergy;
+                    if (energyDiff <= 0)
+                    {
+                        nextTab[cell.Item1][cell.Item2] = neighbours[i];
+                        Draw(cell.Item1, cell.Item2, neighbours[i]);
+                        break;
+                    }
+                    else
+                    {
+                        double probability = Math.Exp(-(energyDiff / kt));
+                        if (rand.NextDouble() <= probability)
+                        {
+                            nextTab[cell.Item1][cell.Item2] = neighbours[i];
+                            Draw(cell.Item1, cell.Item2, neighbours[i]);
+                            break;
+                        }
+                    }
+                }
+            }
+            pictureBox1.Image = DrawArea;
+        }
+
+        private int OriginalEnergy(int row, int col)
+        {
+            int energy = 0;
+            for (int i = Math.Max(row - 1, 0); i <= Math.Min(row + 1, szer - 1); i++)
+            {
+                for (int j = Math.Max(col - 1, 0); j <= Math.Min(col + 1, wys - 1); j++)
+                {
+                    if (beginTab[row][col] != beginTab[i][j])
+                    {
+                        energy++;
+                    }
+                }
+            }
+            return energy;
+        }
+        private int AlteredEnergy(int row, int col, int state)
+        {
+            int energy = 0;
+            for (int i = Math.Max(row - 1, 0); i <= Math.Min(row + 1, szer - 1); i++)
+            {
+                for (int j = Math.Max(col - 1, 0); j <= Math.Min(col + 1, wys - 1); j++)
+                {
+                    if (nextTab[i][j] != state)
+                    {
+                        energy++;
+                    }
+                }
+            }
+            return energy;
+        }
+        private List<int> Neighbours(int row, int col)
+        {
+            List<int> neighbours = new List<int>();
+            for (int i = Math.Max(row - 1, 0); i <= Math.Min(row + 1, szer - 1); i++)
+            {
+                for (int j = Math.Max(col - 1, 0); j <= Math.Min(col + 1, wys - 1); j++)
+                {
+                    if (row != i && col != j && !neighbours.Contains(nextTab[i][j]))
+                    {
+                        neighbours.Add(nextTab[i][j]);
+                    }
+                }
+            }
+            return neighbours;
         }
     }
 
