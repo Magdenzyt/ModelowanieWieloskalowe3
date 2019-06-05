@@ -13,7 +13,9 @@ namespace WindowsFormsApplication3
     public partial class Form1 : Form
     {
         Bitmap DrawArea;
+        Bitmap DrawArea2;
         Graphics g;
+        Graphics g2;
         SolidBrush pinkBrush = new SolidBrush(Color.HotPink);
         List<Brush> brushes = new List<Brush>();
 
@@ -37,7 +39,10 @@ namespace WindowsFormsApplication3
             timer.Interval = 200;
             timer.Tick += new EventHandler(timer1_Tick);
             DrawArea = new Bitmap(pictureBox1.Size.Width, pictureBox1.Size.Height);
+            DrawArea2 = new Bitmap(pictureBox2.Size.Width, pictureBox2.Size.Height);
             pictureBox1.Image = DrawArea;
+            pictureBox2.Image = DrawArea2;
+            g2 = Graphics.FromImage(DrawArea2);
             g = Graphics.FromImage(DrawArea);
 
             var rand = new Random();
@@ -417,7 +422,7 @@ namespace WindowsFormsApplication3
         {
             nextState = 1;
             var rand = new Random();
-          
+            int czyDodało = 0;
             List<Tuple<int, int>> points = new List<Tuple<int, int>>();
 
             for (int i = 0; i < number; i++)
@@ -439,10 +444,16 @@ namespace WindowsFormsApplication3
                     if (isValid)
                     {
                         points.Add(new Tuple<int, int>(row, col));
+                        czyDodało++;
                         break;
                     }
                 }
             }
+            if (czyDodało < number)
+            {
+                MessageBox.Show("Uwaga! Dodało tylko: " + czyDodało);
+            }
+            
 
             for (int i = 0; i < points.Count; i++)
             {
@@ -488,12 +499,19 @@ namespace WindowsFormsApplication3
             double kT = double.Parse(textBox10.Text);
             for (int i = 0; i < iterations; i++)
             {
-                MonteCarlo(kT);
+
+                List<List<int>> energy = MonteCarlo(kT);
+                DrawEnergy(energy);
                 Application.DoEvents();
             }
         }
-        public void MonteCarlo(double kt)
+        public List<List<int>> MonteCarlo(double kt)
         {
+            List<List<int>> returnEnergy = new List<List<int>>();
+            for (int i = 0; i < szer; i++)
+            {
+                returnEnergy.Add(Enumerable.Repeat<int>(0, wys).ToList());
+            }
             var rand = new Random();
             List<Tuple<int, int>> cells = new List<Tuple<int, int>>();
             for (int i = 0; i < nextTab.Count; i++)
@@ -509,6 +527,7 @@ namespace WindowsFormsApplication3
                 Tuple<int, int> cell = cells[index];
                 cells.Remove(cell);
                 int currentEnergy = OriginalEnergy(cell.Item1, cell.Item2);
+                returnEnergy[cell.Item1][cell.Item2]=currentEnergy;
                 List<int> neighbours = Neighbours(cell.Item1, cell.Item2);
                 neighbours.Remove(nextTab[cell.Item1][cell.Item2]);
                 if (neighbours.Count <= 0) continue;
@@ -535,6 +554,29 @@ namespace WindowsFormsApplication3
                 }
             }
             pictureBox1.Image = DrawArea;
+            return returnEnergy;
+        }
+
+        public void DrawEnergy(List<List<int>> energy)
+        {
+            int colorDiff = 255 / 9;
+            List<Brush> brushe = new List<Brush>();
+
+            for(int i = 0; i<9; i++)
+            {
+                brushe.Add(new SolidBrush(Color.FromArgb(colorDiff * i, colorDiff*i, colorDiff*i)));
+            }
+            g2.Clear(Color.White);
+            for (int i=0; i<szer; i++)
+            {
+                for(int j=0; j<wys; j++)
+                {
+                    
+                    g2.FillRectangle(brushe[energy[i][j]], i * 5, j * 5, 5, 5);
+                }
+            }
+            pictureBox2.Image = DrawArea2;
+
         }
 
         private int OriginalEnergy(int row, int col)
