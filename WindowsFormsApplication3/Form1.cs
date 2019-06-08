@@ -46,7 +46,7 @@ namespace WindowsFormsApplication3
             g = Graphics.FromImage(DrawArea);
 
             var rand = new Random();
-            for (int i = 0; i < 101; i++)
+            for (int i = 0; i < 250000; i++)
             {
                 Color randomColor = Color.FromArgb(rand.Next(256), rand.Next(256), rand.Next(256));
                 brushes.Add(new SolidBrush(randomColor));
@@ -576,6 +576,7 @@ namespace WindowsFormsApplication3
                 }
             }
             pictureBox2.Image = DrawArea2;
+           // Application.DoEvents();
 
         }
 
@@ -594,6 +595,23 @@ namespace WindowsFormsApplication3
             }
             return energy;
         }
+        private List<List<int>> CalculateEenergy()
+        {
+            var energy = new List<List<int>>();
+
+            for (int i = 0; i < szer; i++)
+            {
+                energy.Add(new List<int>());
+                for (int j = 0; j < wys; j++)
+                {
+                    energy[i].Add(OriginalEnergy(i, j));
+                }
+            }
+
+            return energy;
+        }
+
+
         private int AlteredEnergy(int row, int col, int state)
         {
             int energy = 0;
@@ -623,6 +641,150 @@ namespace WindowsFormsApplication3
                 }
             }
             return neighbours;
+        }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            Recrystalize(86711000000000, 9.41, 0.2);
+        }
+
+        internal void Recrystalize(double A, double B, double time)
+        {
+            double t = 0;
+            double tDiff = 0.001;
+            double x = 0.2;
+            double y = 1 - x;
+            double roCritical = 4215840142323.42 / (wys * szer);
+            List<List<double>> dislocation = new List<List<double>>();
+            for (int i = 0; i < szer; i++)
+            {
+                dislocation.Add(Enumerable.Repeat<double>(0.0, wys).ToList());
+            }
+
+            List<List<bool>> currentRecristalisation = new List<List<bool>>();
+            List<List<bool>> previousRecristalisation = new List<List<bool>>();
+            for (int i = 0; i < szer; i++)
+            {
+                currentRecristalisation.Add(Enumerable.Repeat<bool>(false, wys).ToList());
+            }
+            for (int i = 0; i < szer; i++)
+            {
+                previousRecristalisation.Add(Enumerable.Repeat<bool>(false, wys).ToList());
+            }
+            double ro = 0;
+            double previousRo = 0;
+
+
+            while (t <= time)
+            {
+                           
+                previousRo = ro;
+                ro = A / B + (1 - A / B) * Math.Pow(Math.E, -B * t);
+
+                double deltaRo = ro - previousRo;
+                double cellDislocation = deltaRo / (szer * wys);
+
+                for (int i = 0; i < dislocation.Count; i++)
+                {
+                    for (int j = 0; j < dislocation[i].Count; j++)
+                    {
+                        dislocation[i][j] += cellDislocation * x;
+                        deltaRo -= cellDislocation * x;
+                    }
+                }
+
+                double package = cellDislocation * y;
+                var energy = CalculateEenergy();
+                DrawEnergy(energy);
+                var rand = new Random();
+                while (deltaRo > 0)
+                {
+                    int row = rand.Next(szer);
+                    int col = rand.Next(wys);
+
+                    double chance = 0.2;
+                    if (energy[row][col] > 0)
+                    {
+                        chance = 0.8;
+                    }
+
+                    if (rand.NextDouble() <= chance)
+                    {
+                        dislocation[row][col] += package;
+                        deltaRo -= package;
+                    }
+                }
+
+                for (int i = 0; i < szer; i++)
+                {
+                    for (int j = 0; j < wys; j++)
+                    {
+                        if (dislocation[i][j] >= roCritical &&
+                            energy[i][j] > 0)
+                        {
+                            dislocation[i][j] = 0;
+                            currentRecristalisation[i][j] = true;
+                            nextTab[i][j] = nextState++;
+                            Draw(i, j, nextState);
+                        }
+                    }
+                    pictureBox1.Image = DrawArea;
+                    Application.DoEvents();
+                }
+
+                
+
+               for(int i = 0; i<szer; i++)
+                {
+                    for (int j = 0; j < wys; j++)
+                    {
+                        Tuple<int, int> recrystalizedNeighbour = new Tuple<int, int>(-1, -1);
+                        for (int k = Math.Max(i - 1, 0); k <= Math.Min(i + 1, szer - 1); k++)
+                        {
+                            for (int l = Math.Max(j - 1, 0); l <= Math.Min(j + 1, wys - 1); l++)
+                            {
+                                if (previousRecristalisation[k][l])
+                                {
+                                    recrystalizedNeighbour = new Tuple<int, int>(k, l);
+                                }
+                            }
+                        }
+                        if (recrystalizedNeighbour.Item1 != -1 && recrystalizedNeighbour.Item2 != -1)
+                        {
+                            bool toRecrystalize = true;
+                            for (int k = Math.Max(i - 1, 0); k <= Math.Min(i + 1, szer - 1); k++)
+                            {
+                                for (int l = Math.Max(j - 1, 0); l <= Math.Min(j + 1, wys - 1); l++)
+                                {
+                                    if ((k != i || l != j) &&
+                                        dislocation[k][l] >= dislocation[i][j])
+                                    {
+                                        toRecrystalize = false;
+                                    }
+                                }
+                            }
+                            if (toRecrystalize)
+                            {
+                                dislocation[i][j] = 0;
+                                currentRecristalisation[i][j] = true;
+                                nextTab[i][j] = nextTab[recrystalizedNeighbour.Item1][recrystalizedNeighbour.Item2];
+                                Draw(i, j, nextTab[i][j]);                    
+                            }
+                        }
+                    }
+                }
+                previousRecristalisation = currentRecristalisation;
+                currentRecristalisation.Clear();
+                for (int i = 0; i < szer; i++)
+                {
+                    currentRecristalisation.Add(Enumerable.Repeat<bool>(false, wys).ToList());
+                }
+                pictureBox1.Image = DrawArea;
+                Application.DoEvents();
+
+
+                t += tDiff;
+            }
         }
     }
 

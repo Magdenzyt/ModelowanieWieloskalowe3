@@ -62,6 +62,7 @@
             this.textBox10 = new System.Windows.Forms.TextBox();
             this.button3 = new System.Windows.Forms.Button();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
+            this.button4 = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
@@ -94,6 +95,7 @@
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(66, 22);
             this.textBox1.TabIndex = 2;
+            this.textBox1.Text = "4";
             // 
             // textBox2
             // 
@@ -144,6 +146,7 @@
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(66, 22);
             this.textBox3.TabIndex = 8;
+            this.textBox3.Text = "100";
             // 
             // textBox4
             // 
@@ -151,6 +154,7 @@
             this.textBox4.Name = "textBox4";
             this.textBox4.Size = new System.Drawing.Size(66, 22);
             this.textBox4.TabIndex = 9;
+            this.textBox4.Text = "100";
             // 
             // label4
             // 
@@ -272,6 +276,7 @@
             this.textBox8.Name = "textBox8";
             this.textBox8.Size = new System.Drawing.Size(66, 22);
             this.textBox8.TabIndex = 0;
+            this.textBox8.Text = "5";
             // 
             // label10
             // 
@@ -342,6 +347,7 @@
             this.textBox9.Name = "textBox9";
             this.textBox9.Size = new System.Drawing.Size(140, 22);
             this.textBox9.TabIndex = 22;
+            this.textBox9.Text = "5";
             // 
             // textBox10
             // 
@@ -349,6 +355,7 @@
             this.textBox10.Name = "textBox10";
             this.textBox10.Size = new System.Drawing.Size(142, 22);
             this.textBox10.TabIndex = 23;
+            this.textBox10.Text = "0,6";
             // 
             // button3
             // 
@@ -362,17 +369,28 @@
             // 
             // pictureBox2
             // 
-            this.pictureBox2.Location = new System.Drawing.Point(1170, 59);
+            this.pictureBox2.Location = new System.Drawing.Point(1169, 15);
             this.pictureBox2.Name = "pictureBox2";
             this.pictureBox2.Size = new System.Drawing.Size(500, 500);
             this.pictureBox2.TabIndex = 25;
             this.pictureBox2.TabStop = false;
+            // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(975, 201);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(125, 59);
+            this.button4.TabIndex = 26;
+            this.button4.Text = "Rekrystalzacja";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1714, 611);
+            this.Controls.Add(this.button4);
             this.Controls.Add(this.pictureBox2);
             this.Controls.Add(this.button3);
             this.Controls.Add(this.textBox10);
@@ -446,6 +464,7 @@
         private System.Windows.Forms.TextBox textBox10;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.PictureBox pictureBox2;
+        private System.Windows.Forms.Button button4;
     }
 }
 
