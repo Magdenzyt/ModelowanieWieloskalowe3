@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.IO;
 
 namespace WindowsFormsApplication3
 {
@@ -25,6 +26,7 @@ namespace WindowsFormsApplication3
 
         Random rnd = new Random();
         int nextState = 1;
+        String roToFile;
 
         Timer timer;
 
@@ -319,6 +321,11 @@ namespace WindowsFormsApplication3
         {       
            g.FillRectangle(brushes[state - 1], col * 5, row * 5, 5, 5);
         }
+        public void DrawD(int row, int col)
+        {
+            g2.FillRectangle(Brushes.Red, col * 5, row * 5, 5, 5);
+            pictureBox2.Image = DrawArea2;
+        }
 
         private void button1_Click(object sender, EventArgs e)
         {                 
@@ -572,7 +579,7 @@ namespace WindowsFormsApplication3
                 for(int j=0; j<wys; j++)
                 {
                     
-                    g2.FillRectangle(brushe[energy[i][j]], i * 5, j * 5, 5, 5);
+                    g2.FillRectangle(brushe[energy[j][i]], i * 5, j * 5, 5, 5);
                 }
             }
             pictureBox2.Image = DrawArea2;
@@ -680,6 +687,7 @@ namespace WindowsFormsApplication3
                            
                 previousRo = ro;
                 ro = A / B + (1 - A / B) * Math.Pow(Math.E, -B * t);
+                roToFile += $"t: {t},ro: {ro}\n";
 
                 double deltaRo = ro - previousRo;
                 double cellDislocation = deltaRo / (szer * wys);
@@ -726,6 +734,7 @@ namespace WindowsFormsApplication3
                             currentRecristalisation[i][j] = true;
                             nextTab[i][j] = nextState++;
                             Draw(i, j, nextState);
+                            DrawD(i, j);
                         }
                     }
                     pictureBox1.Image = DrawArea;
@@ -774,7 +783,8 @@ namespace WindowsFormsApplication3
                     }
                 }
                 previousRecristalisation = currentRecristalisation;
-                currentRecristalisation.Clear();
+                //currentRecristalisation.Clear();
+                currentRecristalisation = new List<List<bool>>();
                 for (int i = 0; i < szer; i++)
                 {
                     currentRecristalisation.Add(Enumerable.Repeat<bool>(false, wys).ToList());
@@ -784,6 +794,11 @@ namespace WindowsFormsApplication3
 
 
                 t += tDiff;
+            }
+
+            using(StreamWriter file = new StreamWriter(@"pliczek.txt"))
+            {
+                file.WriteLine(roToFile);
             }
         }
     }
